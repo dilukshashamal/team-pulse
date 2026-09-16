@@ -16,9 +16,9 @@ export default async function AnnouncementsLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="announcement-workspace min-h-svh flex flex-col">
       <AppHeader user={session.user} />
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main id="main-content" className="workspace-main">
         {children}
       </main>
     </div>

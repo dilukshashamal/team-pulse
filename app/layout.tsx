@@ -12,8 +12,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full bg-slate-50">
-      <body className="h-full antialiased text-slate-900 flex flex-col">{children}</body>
+    <html lang="en" className="h-full">
+      <body className="h-full antialiased flex flex-col">
+        <a href="#main-content" className="sr-only z-50 rounded-lg bg-white p-3 text-indigo-700 focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
+        {children}
+      </body>
     </html>
   );
 }

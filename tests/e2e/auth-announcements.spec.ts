@@ -46,9 +46,13 @@ test.describe("TeamPulse End-to-End User Journey", () => {
     await expect(page.locator("text=Welcome to TeamPulse!")).toBeVisible();
 
     // 5. Create a new announcement
+    await page.getByRole("button", { name: "New announcement", exact: true }).click();
     await page.fill('input[name="title"]', uniqueTitle);
     await page.fill('textarea[name="body"]', uniqueBody);
     await page.click('button:has-text("Publish")');
+    await expect(page.getByRole("status")).toContainText("Announcement published.");
+    await expect(page.getByRole("button", { name: "New announcement", exact: true }))
+      .toHaveAttribute("aria-expanded", "false");
 
     // 6. Verify new announcement immediately appears in feed
     await expect(page.locator(`text=${uniqueTitle}`)).toBeVisible({ timeout: 10000 });

@@ -13,7 +13,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`text-center py-12 px-4 rounded-xl border border-dashed border-slate-300 bg-white ${className}`}
+      className={`text-center py-20 px-4 ${className}`}
     >
       <div className="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mb-4">
         <svg

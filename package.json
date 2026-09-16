@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:clear-announcements": "tsx prisma/clear-announcements.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

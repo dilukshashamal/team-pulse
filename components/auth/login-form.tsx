@@ -17,7 +17,7 @@ export const LoginForm: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setFormError(null);
     setFieldErrors({});
@@ -59,22 +59,21 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5" aria-busy={isSubmitting}>
       {formError && <FormError message={formError} />}
 
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
-          Work Email
+          Work email
         </label>
         <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
-          autoFocus
           required
           disabled={isSubmitting}
           value={email}
@@ -82,7 +81,9 @@ export const LoginForm: React.FC = () => {
             setEmail(e.target.value);
             if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
           }}
-          placeholder="demo@teampulse.internal"
+          placeholder="you@company.com"
+          autoCapitalize="none"
+          spellCheck={false}
           error={!!fieldErrors.email}
           aria-describedby={fieldErrors.email ? "email-error" : undefined}
         />
@@ -96,7 +97,7 @@ export const LoginForm: React.FC = () => {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-slate-700 mb-1"
+          className="block text-sm font-medium text-slate-700 mb-2"
         >
           Password
         </label>
@@ -112,7 +113,7 @@ export const LoginForm: React.FC = () => {
             setPassword(e.target.value);
             if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
           }}
-          placeholder="••••••••••••"
+          placeholder="Enter your password"
           error={!!fieldErrors.password}
           aria-describedby={fieldErrors.password ? "password-error" : undefined}
         />
@@ -129,7 +130,7 @@ export const LoginForm: React.FC = () => {
         isLoading={isSubmitting}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Signing in..." : "Sign in to TeamPulse"}
+        {isSubmitting ? "Signing in..." : "Sign in"}
       </Button>
     </form>
   );

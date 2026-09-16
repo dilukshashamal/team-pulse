@@ -9,10 +9,12 @@ import { createAnnouncementSchema } from "@/lib/validation/announcement";
 
 export interface AnnouncementFormProps {
   onSuccess: () => Promise<unknown> | void;
+  titleRef: React.RefObject<HTMLInputElement>;
 }
 
 export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onSuccess,
+  titleRef,
 }) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -23,7 +25,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setFormError(null);
     setFieldErrors({});
@@ -84,32 +86,33 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm mb-8">
-      <div className="mb-4">
+    <div className="page-enter rounded-[28px] bg-white p-6 sm:p-8">
+      <div className="mb-6">
         <h2 className="text-base font-semibold text-slate-900">
-          Create Announcement
+          New announcement
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Share important updates, releases, or news with the entire team.
+        <p className="text-xs leading-5 text-slate-500 mt-1.5">
+          Share an update with everyone in your organization.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5" aria-busy={isSubmitting}>
         {formError && <FormError message={formError} />}
 
         <div>
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center mb-2">
             <label
               htmlFor="announcement-title"
               className="block text-sm font-medium text-slate-700"
             >
               Title
             </label>
-            <span className="text-xs text-slate-400">
+            <span id="title-count" className="text-xs tabular-nums text-slate-500">
               {title.length}/120
             </span>
           </div>
           <Input
+            ref={titleRef}
             id="announcement-title"
             name="title"
             required
@@ -121,10 +124,10 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                 setFieldErrors((prev) => ({ ...prev, title: undefined }));
               }
             }}
-            placeholder="e.g., Engineering All-Hands Rescheduled"
+            placeholder="Give your update a title"
             maxLength={120}
             error={!!fieldErrors.title}
-            aria-describedby={fieldErrors.title ? "title-error" : undefined}
+            aria-describedby={fieldErrors.title ? "title-count title-error" : "title-count"}
           />
           {fieldErrors.title && (
             <p id="title-error" className="mt-1 text-xs text-rose-600">
@@ -134,14 +137,14 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
 
         <div>
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center mb-2">
             <label
               htmlFor="announcement-body"
               className="block text-sm font-medium text-slate-700"
             >
               Message
             </label>
-            <span className="text-xs text-slate-400">
+            <span id="body-count" className="text-xs tabular-nums text-slate-500">
               {body.length}/2000
             </span>
           </div>
@@ -157,11 +160,11 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                 setFieldErrors((prev) => ({ ...prev, body: undefined }));
               }
             }}
-            placeholder="Write the full update here..."
+            placeholder="What would you like the team to know?"
             maxLength={2000}
-            rows={4}
+            rows={5}
             error={!!fieldErrors.body}
-            aria-describedby={fieldErrors.body ? "body-error" : undefined}
+            aria-describedby={fieldErrors.body ? "body-count body-error" : "body-count"}
           />
           {fieldErrors.body && (
             <p id="body-error" className="mt-1 text-xs text-rose-600">

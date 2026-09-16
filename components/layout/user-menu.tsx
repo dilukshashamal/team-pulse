@@ -29,30 +29,30 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
     .toUpperCase() || "U";
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="hidden sm:flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2 sm:gap-5">
+      <div className="hidden sm:flex min-w-0 items-center gap-3">
         <div
-          className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-semibold text-xs flex items-center justify-center border border-indigo-200 select-none"
+          className="w-9 h-9 shrink-0 rounded-full bg-stone-200/70 text-slate-600 font-semibold text-xs flex items-center justify-center select-none"
           aria-hidden="true"
         >
           {initials}
         </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-slate-900 leading-tight">
+        <div className="min-w-0 max-w-56">
+          <p className="truncate text-sm font-medium text-slate-800 leading-5">
             {displayName}
           </p>
           {user.email && (
-            <p className="text-xs text-slate-500 leading-tight">{user.email}</p>
+            <p className="truncate text-xs text-slate-500 leading-5">{user.email}</p>
           )}
         </div>
       </div>
 
       <Button
-        variant="secondary"
+        variant="ghost"
         onClick={handleLogout}
         isLoading={isLoggingOut}
         aria-label="Log out of TeamPulse"
-        className="text-xs h-9 px-3"
+        className="shrink-0"
       >
         {isLoggingOut ? "Logging out..." : "Log out"}
       </Button>
