@@ -67,6 +67,11 @@ and a sign-in link. Authentication errors are not automatically retried.
 
 ## Test isolation
 
+The same browser suite runs in desktop Chromium, Pixel 7 Chromium emulation, and
+desktop Firefox. Rejected-login cases verify the same generic message and denied
+API/page access for unknown emails and incorrect passwords on a known account.
+The complete publishing journey checks that the feed and composer fit the viewport.
+
 `playwright.config.ts` starts a dedicated production server and refuses to reuse
 an existing server. `tests/e2e/environment.ts` supplies fixed local test settings.
 Global setup starts the `teampulse-e2e` Compose project, migrates and seeds its

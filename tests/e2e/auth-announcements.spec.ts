@@ -17,19 +17,24 @@ test.describe("TeamPulse End-to-End User Journey", () => {
     await expect(page).toHaveURL(/.*\/login/);
   });
 
-  test("invalid credentials show error message", async ({ page }) => {
-    await page.goto("/login");
+  for (const scenario of [
+    { name: "unknown email", email: "wrong@teampulse.internal" },
+    { name: "known email with incorrect password", email: demoEmail },
+  ]) {
+    test(`${scenario.name} is rejected without creating a session`, async ({ page }) => {
+      await page.goto("/login");
+      await page.getByLabel("Work email").fill(scenario.email);
+      await page.getByLabel("Password", { exact: true }).fill("WrongPassword999!");
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
-    await page.fill('input[name="email"]', "wrong@teampulse.internal");
-    await page.fill('input[name="password"]', "WrongPassword999!");
-    await page.click('button[type="submit"]');
-
-    const errorMessage = page
-      .getByRole("alert")
-      .filter({ hasText: "Invalid email or password" });
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText("Invalid email or password");
-  });
+      const errorMessage = page.getByRole("alert").filter({ hasText: "Invalid email or password" });
+      await expect(errorMessage).toHaveText("Invalid email or password. Please check your credentials.");
+      await expect(page).toHaveURL(/\/login$/);
+      expect((await page.request.get("/api/announcements")).status()).toBe(401);
+      await page.goto("/announcements");
+      await expect(page).toHaveURL(/\/login/);
+    });
+  }
 
   test("complete lifecycle: login -> view -> create -> refresh -> logout -> guard", async ({
     page,
@@ -49,6 +54,9 @@ test.describe("TeamPulse End-to-End User Journey", () => {
     // 3. Confirm redirection to /announcements
     await expect(page).toHaveURL(/.*\/announcements/, { timeout: 10000 });
     await expect(page.locator("h1")).toContainText("Announcements");
+    await expect.poll(async () => page.evaluate(() =>
+      document.documentElement.scrollWidth <= window.innerWidth
+    )).toBe(true);
 
     // Existing content can change; verify the real API records instead of a seed title.
     const response = await page.request.get("/api/announcements");
@@ -65,6 +73,9 @@ test.describe("TeamPulse End-to-End User Journey", () => {
 
     // 5. Create a new announcement
     await page.getByRole("button", { name: "New announcement", exact: true }).click();
+    await expect.poll(async () => page.evaluate(() =>
+      document.documentElement.scrollWidth <= window.innerWidth
+    )).toBe(true);
     await page.fill('input[name="title"]', uniqueTitle);
     await page.fill('textarea[name="body"]', uniqueBody);
     await page.click('button:has-text("Publish")');

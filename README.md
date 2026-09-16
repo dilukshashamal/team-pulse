@@ -52,10 +52,10 @@ npm run test
 npm run build
 ```
 
-Browser tests require Docker, a production build, and Playwright Chromium:
+Browser tests require Docker, a production build, and Playwright Chromium and Firefox:
 
 ```bash
-npx playwright install chromium
+npx playwright install chromium firefox
 npm run build
 npm run test:e2e
 ```
@@ -65,7 +65,10 @@ container on **55432**. Both ports must be free. The test configuration override
 local database/auth settings and never reuses the development server. Setup
 applies migrations and seeds the test database; teardown removes the container
 and its temporary data. The tests cover authentication, API protection, publishing,
-persistence after refresh, and logout.
+persistence after refresh, and logout across desktop Chromium, mobile Chromium
+(Pixel 7 emulation), and desktop Firefox. Invalid-login tests cover both an unknown
+email and a known account with the wrong password. The lifecycle also checks for
+horizontal overflow with the feed and composer visible.
 
 If a run is interrupted, remove its container with:
 
