@@ -33,50 +33,7 @@ npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000). Log in with
-**demo@teampulse.internal / Password123!**. These credentials and the seed script
-are for local assessment only; do not seed this account in a deployed environment.
-
-For a production build locally:
-
-```bash
-npm run build
-npm run start
-```
-
-## Verification
-
-```bash
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-```
-
-Browser tests require Docker, a production build, and Playwright Chromium and Firefox:
-
-```bash
-npx playwright install chromium firefox
-npm run build
-npm run test:e2e
-```
-
-E2E tests start a separate app on port **3100** and a disposable PostgreSQL
-container on **55432**. Both ports must be free. The test configuration overrides
-local database/auth settings and never reuses the development server. Setup
-applies migrations and seeds the test database; teardown removes the container
-and its temporary data. The tests cover authentication, API protection, publishing,
-persistence after refresh, and logout across desktop Chromium, mobile Chromium
-(Pixel 7 emulation), and desktop Firefox. Invalid-login tests cover both an unknown
-email and a known account with the wrong password. The lifecycle also checks for
-horizontal overflow with the feed and composer visible.
-
-If a run is interrupted, remove its container with:
-
-```bash
-docker compose -p teampulse-e2e -f docker-compose.e2e.yml down --volumes
-```
-
-The next run also cleans up any leftover test container before starting.
+**demo@teampulse.internal / Password123!**. 
 
 ## Key decisions
 
