@@ -2,28 +2,37 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
+import { SessionExpired } from "@/components/auth/session-expired";
 import { AnnouncementCard } from "./announcement-card";
 import { AnnouncementForm } from "./announcement-form";
 import { AnnouncementSkeleton } from "./announcement-skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import type { AnnouncementItem } from "@/lib/announcements/service";
+import { announcementListResponseSchema, type AnnouncementResponse } from "@/lib/announcements/contracts";
 
-const fetcher = async (url: string): Promise<AnnouncementItem[]> => {
+class SessionExpiredError extends Error {}
+
+const fetcher = async (url: string): Promise<AnnouncementResponse[]> => {
   const res = await fetch(url);
+  if (res.status === 401) throw new SessionExpiredError("Session expired");
   if (!res.ok) throw new Error("Failed to load announcements.");
-  const json: { data: AnnouncementItem[] } = await res.json();
-  return json.data;
+  const json: unknown = await res.json();
+  return announcementListResponseSchema.parse(json).data;
 };
 
 export const AnnouncementList: React.FC = () => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [publishSessionExpired, setPublishSessionExpired] = useState(false);
   const composerButton = useRef<HTMLButtonElement>(null);
   const titleInput = useRef<HTMLInputElement>(null);
-  const { data: announcements, error, isLoading, mutate } = useSWR<AnnouncementItem[], Error>(
-    "/api/announcements", fetcher, { revalidateOnFocus: true }
+  const { data: announcements, error, isLoading, mutate } = useSWR<AnnouncementResponse[], Error>(
+    publishSessionExpired ? null : "/api/announcements", fetcher, {
+      revalidateOnFocus: true,
+      shouldRetryOnError: (fetchError: Error) => !(fetchError instanceof SessionExpiredError),
+    }
   );
+  const sessionExpired = publishSessionExpired || error instanceof SessionExpiredError;
 
   useEffect(() => {
     if (!successMessage) return;
@@ -31,12 +40,15 @@ export const AnnouncementList: React.FC = () => {
     return () => window.clearTimeout(timeoutId);
   }, [successMessage]);
 
-  const handlePublished = async (): Promise<void> => {
+  const handlePublished = async (announcement: AnnouncementResponse): Promise<void> => {
+    // The POST response confirms persistence even if a subsequent GET is unavailable.
+    await mutate((current = []) => [announcement, ...current.filter((item) => item.id !== announcement.id)], { revalidate: false });
     setIsComposerOpen(false);
     setSuccessMessage("Announcement published. Your update is shared with the team.");
     composerButton.current?.focus();
-    await mutate();
   };
+
+  if (sessionExpired) return <SessionExpired />;
 
   return (
     <div className="page-enter">
@@ -75,6 +87,7 @@ export const AnnouncementList: React.FC = () => {
         <div id="announcement-composer" hidden={!isComposerOpen} className="page-enter">
           <AnnouncementForm
             onSuccess={handlePublished}
+            onSessionExpired={() => setPublishSessionExpired(true)}
             titleRef={titleInput}
           />
         </div>

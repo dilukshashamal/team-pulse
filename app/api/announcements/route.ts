@@ -6,7 +6,7 @@ import { AppError, UnauthorizedError } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
     await requireUser();
     const announcements = await getAnnouncements();
@@ -27,7 +27,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   try {
     const user = await requireUser();
 

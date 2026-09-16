@@ -26,6 +26,19 @@ describe("Announcements API Route Handlers (/api/announcements)", () => {
   });
 
   describe("GET /api/announcements", () => {
+    it("sanitizes unexpected database errors", async () => {
+      vi.mocked(requireUser).mockResolvedValueOnce({ id: "user-123" });
+      vi.mocked(getAnnouncements).mockRejectedValueOnce(new Error("private database details"));
+      const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+      try {
+        const response = await GET();
+        expect(response.status).toBe(500);
+        expect(await response.text()).not.toContain("private database details");
+        expect(log).toHaveBeenCalled();
+      } finally {
+        log.mockRestore();
+      }
+    });
     it("should return 401 when unauthenticated", async () => {
       vi.mocked(requireUser).mockRejectedValueOnce(
         new UnauthorizedError("Authentication required")

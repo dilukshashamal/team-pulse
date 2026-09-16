@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import type { AnnouncementItem } from "@/lib/announcements/service";
+import type { AnnouncementResponse } from "@/lib/announcements/contracts";
 import { AnnouncementCover } from "./announcement-cover";
 
-export interface AnnouncementCardProps { announcement: AnnouncementItem }
+export interface AnnouncementCardProps { announcement: AnnouncementResponse }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short", day: "numeric", year: "numeric", timeZone: "UTC",

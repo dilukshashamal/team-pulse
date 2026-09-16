@@ -13,10 +13,18 @@ export interface UserMenuProps {
 
 export const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     setIsLoggingOut(true);
-    await signOut({ callbackUrl: "/login" });
+    setLogoutError(null);
+    try {
+      await signOut({ callbackUrl: "/login" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setLogoutError("Unable to log out. Please try again.");
+      setIsLoggingOut(false);
+    }
   };
 
   const displayName = user.name || "Team Member";
@@ -30,6 +38,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
 
   return (
     <div className="flex min-w-0 items-center gap-2 sm:gap-5">
+      {logoutError && <p role="alert" className="text-xs text-rose-600">{logoutError}</p>}
       <div className="hidden sm:flex min-w-0 items-center gap-3">
         <div
           className="w-9 h-9 shrink-0 rounded-full bg-stone-200/70 text-slate-600 font-semibold text-xs flex items-center justify-center select-none"

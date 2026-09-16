@@ -6,14 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormError } from "@/components/ui/form-error";
 import { createAnnouncementSchema } from "@/lib/validation/announcement";
+import { announcementResponseSchema, announcementErrorSchema, type AnnouncementResponse } from "@/lib/announcements/contracts";
 
 export interface AnnouncementFormProps {
-  onSuccess: () => Promise<unknown> | void;
+  onSuccess: (announcement: AnnouncementResponse) => Promise<void>;
+  onSessionExpired: () => void;
   titleRef: React.RefObject<HTMLInputElement>;
 }
 
 export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onSuccess,
+  onSessionExpired,
   titleRef,
 }) => {
   const [title, setTitle] = useState("");
@@ -52,19 +55,25 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         body: JSON.stringify(validation.data),
       });
 
-      const responseData = await res.json().catch(() => null);
+      if (res.status === 401) {
+        onSessionExpired();
+        return;
+      }
+
+      const responseData: unknown = await res.json();
 
       if (!res.ok) {
-        if (res.status === 400 && responseData?.error?.details) {
-          const details = responseData.error.details;
+        const parsedError = announcementErrorSchema.safeParse(responseData);
+        if (res.status === 400 && parsedError.success && parsedError.data.error.details) {
+          const details = parsedError.data.error.details;
           setFieldErrors({
             title: details.title?.[0],
             body: details.body?.[0],
           });
-          setFormError(responseData.error.message || "Please fix the validation errors.");
+          setFormError(parsedError.data.error.message);
         } else {
           setFormError(
-            responseData?.error?.message ||
+            (parsedError.success ? parsedError.data.error.message : undefined) ||
               "Unable to publish announcement. Please try again."
           );
         }
@@ -72,11 +81,11 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         return;
       }
 
-      // Success: clear fields and trigger revalidation
+      const { data: announcement } = announcementResponseSchema.parse(responseData);
       setTitle("");
       setBody("");
       setFieldErrors({});
-      await onSuccess();
+      await onSuccess(announcement);
     } catch (err) {
       console.error("Announcement creation unexpected error:", err);
       setFormError("Unable to publish announcement. Please try again.");
